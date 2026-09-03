@@ -1,0 +1,84 @@
+"use client";
+
+import React from "react";
+import { Check, Zap } from "lucide-react";
+import { Button } from "@/src/elements/ui/button";
+
+interface TelegramSalesCTAProps {
+  sales: {
+    title: string;
+    subtitle?: string;
+    button1_title?: string;
+    button1_url?: string;
+    button2_title?: string;
+    button2_url?: string;
+    button2_description?: string;
+    bullets?: string[];
+  };
+  isAuthenticated: boolean;
+  router: { push: (url: string) => void };
+  primaryColor: string;
+  tgGradient: string;
+}
+
+export default function TelegramSalesCTA({ sales, isAuthenticated, router, primaryColor, tgGradient }: TelegramSalesCTAProps) {
+  const defaultSales = {
+    title: "Automate Your Telegram Chat Today",
+    subtitle: "Connect your account in seconds, write easy reply buttons, set up key word detection, and view all chats in real-time.",
+    button1_title: "Try For Free",
+    button1_url: "/signup",
+    button2_title: "Talk to Sales",
+    button2_url: "/pricing",
+    bullets: ["Easy Sign In", "Official Connection", "Cancel Anytime"]
+  };
+
+  const title = sales.title || defaultSales.title;
+  const subtitle = sales.subtitle || defaultSales.subtitle;
+  const button1_title = sales.button1_title || defaultSales.button1_title;
+  const button1_url = sales.button1_url || defaultSales.button1_url;
+  const button2_title = sales.button2_title || defaultSales.button2_title;
+  const button2_url = sales.button2_url || sales.button2_description || defaultSales.button2_url;
+  const bullets = Array.isArray(sales.bullets) ? sales.bullets : defaultSales.bullets;
+
+  return (
+    <section className="py-[calc(20px+(50-20)*((100vw-320px)/(1920-320)))] bg-white">
+      <div className="container mx-auto px-[calc(8px+(24-8)*((100vw-320px)/(1920-320)))] md:px-12 xl:px-16">
+        <div className="max-w-6xl mx-auto rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 p-[calc(10px+(30-10)*((100vw-320px)/(1920-320)))] text-white text-center relative overflow-hidden shadow-2xl shadow-sky-950/20">
+          <div className="absolute top-[-50%] left-[-50%] w-[100%] h-[100%] rounded-full bg-[#0088cc]/15 blur-[130px] pointer-events-none" style={{ backgroundColor: primaryColor, opacity: 0.15 }} />
+
+          <div className="relative z-10 max-w-2xl mx-auto">
+            <h2 className="text-[calc(22px+16*((100vw-320px)/1600))] font-bold tracking-tight leading-tight">
+              {title}
+            </h2>
+            {subtitle && (
+              <p className="mt-4 text-[16px] text-slate-300 font-medium leading-relaxed">
+                {subtitle}
+              </p>
+            )}
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
+              {button2_title && (
+                <Button
+                  onClick={() => router.push(button2_url)}
+                  className="bg-transparent hover:bg-white/10 text-white border-2 border-white/30 px-8! py-5! h-12! rounded-lg font-bold text-[15px] cursor-pointer flex items-center justify-center gap-2 w-full sm:w-auto"
+                >
+                  {button2_title}
+                </Button>
+              )}
+            </div>
+
+            {bullets.length > 0 && (
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 justify-center text-xs font-bold text-slate-300">
+                {bullets.map((bullet: string, idx: number) => (
+                  <span key={idx} className="flex items-center gap-1.5">
+                    <Check size={14} style={{ color: "oklch(0.86 0.14 85)" }} /> {bullet}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
