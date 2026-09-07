@@ -1,9 +1,8 @@
 # FRONTEND
-
-
-NEXTAUTH_URL=https://whatsapp-api-1-909486928139.asia-south1.run.app
+NEXTAUTH_URL=https://your-domain.app
 NEXT_PUBLIC_BASE_PATH=
 NEXTAUTH_SECRET=GEvvwY18czd6Y8wzDjNuIZ8YR/Y3+3XrE4r257JJCvA=
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
 
 # OAuth
 GITHUB_ID=your-github-id
@@ -12,4 +11,4 @@ GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 
 # SOCKET
-NEXT_PUBLIC_SOCKET_URL=https://whatsapp-api-1-909486928139.asia-south1.run.app
+NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
