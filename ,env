@@ -1,5 +1,5 @@
 # FRONTEND
-NEXTAUTH_URL=https://your-domain.app
+NEXTAUTH_URL=https://whatsapp-api-frontend-three.vercel.app/
 NEXT_PUBLIC_BASE_PATH=
 NEXTAUTH_SECRET=GEvvwY18czd6Y8wzDjNuIZ8YR/Y3+3XrE4r257JJCvA=
 NEXT_PUBLIC_API_URL=https://whatsapp-api-frontend-three.vercel.app/api
