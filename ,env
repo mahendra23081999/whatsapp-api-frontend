@@ -9,6 +9,6 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 NEXTAUTH_URL=https://whatsapp-api-frontend-three.vercel.app
 NEXT_PUBLIC_BASE_PATH=""
 NEXTAUTH_SECRET=...
-NEXT_PUBLIC_API_URL=https://whatsapp-api-1-909486928139.asia-south1.run.app/api
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
 
 NEXT_PUBLIC_SOCKET_URL=https://whatsapp-api-1-909486928139.asia-south1.run.app
