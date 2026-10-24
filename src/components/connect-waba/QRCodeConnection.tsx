@@ -36,30 +36,49 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
   const currentWabaId = latestWorkspace?.waba_id || selectedWorkspace?.waba_id;
   const isConnected = isBaileys ? !!currentWabaId && connectionStatus === "connected" : !!currentWabaId;
 
+  // The backend generates the QR asynchronously, so the first responses usually have qr_code: null.
+  const pollForQR = useCallback((targetWabaId: string) => {
+    let done = false;
+    const finish = () => {
+      done = true;
+      clearInterval(poll);
+      clearTimeout(timeout);
+    };
+    const poll = setInterval(async () => {
+      try {
+        const pollRes = await getQRCode(targetWabaId).unwrap();
+        if (!done && (pollRes?.data?.qr_code || pollRes?.data?.status === "connected")) {
+          finish();
+          refetchWorkspaces();
+        }
+      } catch (error: any) {
+        if (done) return;
+        finish();
+        setStatus("failed");
+        toast.error(error?.data?.message || error?.message || t("failed_fetch_qr"));
+      }
+    }, 2000);
+    const timeout = setTimeout(() => {
+      if (done) return;
+      finish();
+      setStatus("failed");
+      toast.error(t("qr_fetch_failed_after_connect"));
+    }, 60000);
+  }, [getQRCode, refetchWorkspaces, t]);
+
   const handleGenerateQR = useCallback(async () => {
     try {
       setStatus("generating");
       setQrCode(null);
 
-      const targetWabaId = wabaId || latestWorkspace?.waba_id || selectedWorkspace?.waba_id;
+      let targetWabaId = wabaId || latestWorkspace?.waba_id || selectedWorkspace?.waba_id;
 
       if (isBaileys && targetWabaId) {
         try {
           const res = await getQRCode(targetWabaId).unwrap();
           if (res?.success) {
             if (res?.data?.status === 'generating' || (!res?.data?.qr_code && res?.data?.status !== 'connected')) {
-              const poll = setInterval(async () => {
-                try {
-                  const pollRes = await getQRCode(targetWabaId).unwrap();
-                  if (pollRes?.data?.qr_code || pollRes?.data?.status === 'connected') {
-                    clearInterval(poll);
-                    refetchWorkspaces();
-                  }
-                } catch {
-                  clearInterval(poll);
-                }
-              }, 2000);
-              setTimeout(() => clearInterval(poll), 60000);
+              pollForQR(targetWabaId);
               return;
             }
             refetchWorkspaces();
@@ -67,9 +86,14 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
           }
         } catch (error: any) {
           console.error("Direct QR fetch failed:", error);
-          setStatus("failed");
-          toast.error(error?.data?.message || error?.message || t("failed_fetch_qr"));
-          return;
+          if (error?.status !== 404) {
+            setStatus("failed");
+            toast.error(error?.data?.message || error?.message || t("failed_fetch_qr"));
+            return;
+          }
+          // Workspace points to a WABA that no longer exists: create a new connection below
+          targetWabaId = undefined;
+          setWabaId(null);
         }
       }
 
@@ -94,11 +118,10 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
           setWabaId(newWabaId);
 
           const qrRes = await getQRCode(newWabaId).unwrap();
-          if (qrRes?.success && qrRes.data?.qr_code) {
+          if (qrRes?.success && (qrRes.data?.qr_code || qrRes.data?.status === "connected")) {
             refetchWorkspaces();
           } else {
-            setStatus("failed");
-            toast.error(t("qr_fetch_failed_after_connect"));
+            pollForQR(newWabaId);
           }
         } else {
           throw new Error(response.message || t("failed_get_connection_id"));
@@ -108,7 +131,7 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
       setStatus("failed");
       toast.error(error?.data?.message || error?.message || t("failed_init_connection"));
     }
-  }, [isBaileys, wabaId, latestWorkspace, selectedWorkspace, instanceName, getQRCode, refetchWorkspaces, connectWhatsApp, t]);
+  }, [isBaileys, wabaId, latestWorkspace, selectedWorkspace, instanceName, getQRCode, refetchWorkspaces, connectWhatsApp, pollForQR, t]);
 
   useEffect(() => {
     if (selectedWorkspace && isBaileys && selectedWorkspace.waba_id && !wabaId) {
