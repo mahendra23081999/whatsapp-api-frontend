@@ -25,7 +25,12 @@ export async function GET(
 
     if (!response.ok) {
       return NextResponse.json(
-        { message: data.message || "Failed to fetch QR code" },
+        {
+          success: false,
+          message: data.message || data.details || data.error || "Failed to fetch QR code",
+          error: data.error,
+          details: data.details,
+        },
         { status: response.status }
       );
     }

@@ -22,7 +22,10 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
 
     if (!response.ok) {
-      return NextResponse.json({ message: data.message || "connection failed" }, { status: response.status });
+      return NextResponse.json(
+        { message: data.message || data.error || "connection failed", subcode: data.subcode },
+        { status: response.status }
+      );
     }
 
     return NextResponse.json(data, { status: 200 });

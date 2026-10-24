@@ -13,6 +13,7 @@ import { ExternalLink, Link2, MessageCircle, Plug } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import ManualConnectionKeys from "./ManualConnectionKeys";
 import QRCodeConnection from "./QRCodeConnection";
 import WabaSetupGuide from "./WabaSetupGuide";
@@ -92,11 +93,13 @@ const ConnectWABA = () => {
             }
           }
         }
+      } catch (error: any) {
+        toast.error(error?.data?.message || t("failed_to_connect_waba"));
       } finally {
         setIsLoading(false);
       }
     },
-    [connection, selectedWorkspace, refetchWorkspaces, dispatch],
+    [connection, selectedWorkspace, refetchWorkspaces, dispatch, t],
   );
 
   const { startSignup, fbReady } = useEmbeddedSignup(handleFinish);

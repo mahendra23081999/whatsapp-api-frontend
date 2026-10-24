@@ -20,7 +20,8 @@ export const useEmbeddedSignup = (onFinish: (code: string, data: any) => void) =
           payload.type === "WA_EMBEDDED_SIGNUP" &&
           (payload.event === "FINISH" || payload.event === "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING")
         ) {
-          setSignupData(payload.data);
+          // Keep the event so the backend can tell coexistence signups apart
+          setSignupData({ ...payload.data, event: payload.event });
         }
       } catch {}
     };
