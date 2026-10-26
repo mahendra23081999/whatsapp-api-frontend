@@ -5,6 +5,7 @@ import { Button } from "@/src/elements/ui/button";
 import { Card, CardContent } from "@/src/elements/ui/card";
 import { Input } from "@/src/elements/ui/input";
 import { Label } from "@/src/elements/ui/label";
+import { Switch } from "@/src/elements/ui/switch";
 import { useConnectWhatsAppMutation, useLazyGetBaileysQRCodeQuery } from "@/src/redux/api/whatsappApi";
 import { useGetWorkspacesQuery } from "@/src/redux/api/workspaceApi";
 import { useAppSelector } from "@/src/redux/hooks";
@@ -22,6 +23,7 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
   const isBaileys = selectedWorkspace?.waba_type === "baileys";
 
   const [instanceName, setInstanceName] = useState("");
+  const [syncChat, setSyncChat] = useState(true);
   const [wabaId, setWabaId] = useState<string | null>(selectedWorkspace?.waba_id || null);
   const [status, setStatus] = useState<"idle" | "generating" | "scanning" | "connected" | "failed" | "expired">("idle");
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -46,7 +48,7 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
     };
     const poll = setInterval(async () => {
       try {
-        const pollRes = await getQRCode(targetWabaId).unwrap();
+        const pollRes = await getQRCode({ wabaId: targetWabaId, syncChat }).unwrap();
         if (!done && (pollRes?.data?.qr_code || pollRes?.data?.status === "connected")) {
           finish();
           refetchWorkspaces();
@@ -64,7 +66,7 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
       setStatus("failed");
       toast.error(t("qr_fetch_failed_after_connect"));
     }, 60000);
-  }, [getQRCode, refetchWorkspaces, t]);
+  }, [getQRCode, refetchWorkspaces, syncChat, t]);
 
   const handleGenerateQR = useCallback(async () => {
     try {
@@ -75,7 +77,7 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
 
       if (isBaileys && targetWabaId) {
         try {
-          const res = await getQRCode(targetWabaId).unwrap();
+          const res = await getQRCode({ wabaId: targetWabaId, syncChat }).unwrap();
           if (res?.success) {
             if (res?.data?.status === 'generating' || (!res?.data?.qr_code && res?.data?.status !== 'connected')) {
               pollForQR(targetWabaId);
@@ -111,13 +113,14 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
           name: nameToUse,
           provider: "baileys",
           workspace_id: selectedWorkspace?._id,
+          sync_chat: syncChat,
         }).unwrap();
 
         if (response.success && response.data?.waba_id) {
           const newWabaId = response.data.waba_id;
           setWabaId(newWabaId);
 
-          const qrRes = await getQRCode(newWabaId).unwrap();
+          const qrRes = await getQRCode({ wabaId: newWabaId, syncChat }).unwrap();
           if (qrRes?.success && (qrRes.data?.qr_code || qrRes.data?.status === "connected")) {
             refetchWorkspaces();
           } else {
@@ -131,7 +134,7 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
       setStatus("failed");
       toast.error(error?.data?.message || error?.message || t("failed_init_connection"));
     }
-  }, [isBaileys, wabaId, latestWorkspace, selectedWorkspace, instanceName, getQRCode, refetchWorkspaces, connectWhatsApp, pollForQR, t]);
+  }, [isBaileys, wabaId, latestWorkspace, selectedWorkspace, instanceName, syncChat, getQRCode, refetchWorkspaces, connectWhatsApp, pollForQR, t]);
 
   useEffect(() => {
     if (selectedWorkspace && isBaileys && selectedWorkspace.waba_id && !wabaId) {
@@ -169,7 +172,13 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
   const handleRefreshQR = async () => {
     if (wabaId) {
       try {
-        await getQRCode(wabaId).unwrap();
+        const res = await getQRCode({ wabaId, syncChat }).unwrap();
+        // An expired/stale QR is discarded by the backend and regenerated asynchronously
+        if (!res?.data?.qr_code && res?.data?.status !== "connected") {
+          setQrCode(null);
+          setStatus("generating");
+          pollForQR(wabaId);
+        }
         refetchWorkspaces();
       } catch (error: any) {
         toast.error(error?.error || "Failed to refresh QR code");
@@ -214,6 +223,14 @@ const QRCodeConnection = ({ isDisabled }: QRCodeConnectionProps) => {
                   {t("instance_name")} <span className="text-red-500">*</span>
                 </Label>
                 <Input placeholder={t("instance_name_placeholder")} className="h-11 border-(--input-border-color) bg-(--input-color) focus:border-primary dark:border-(--card-border-color) focus:ring-primary" value={instanceName} onChange={(e) => setInstanceName(e.target.value)} disabled={status !== "idle" && status !== "failed"} />
+              </div>
+
+              <div className="flex items-start justify-between gap-4 p-4 rounded-xl border border-gray-100 dark:border-(--card-border-color)">
+                <div className="space-y-1">
+                  <Label htmlFor="sync-chat" className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("sync_chat_history")}</Label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t("sync_chat_history_desc")}</p>
+                </div>
+                <Switch id="sync-chat" checked={syncChat} onCheckedChange={setSyncChat} disabled={status !== "idle" && status !== "failed"} className="data-[state=checked]:bg-primary shadow-xs" />
               </div>
 
               <div className="space-y-4">

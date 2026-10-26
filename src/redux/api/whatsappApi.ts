@@ -59,10 +59,16 @@ export const whatsappApi = baseApi.enhanceEndpoints({ addTagTypes: ["Whatsapp", 
         url: "/whatsapp/phone-numbers",
       }),
     }),
-    getBaileysQRCode: builder.query<{ success: boolean; data?: { qr_code?: string; status?: string } }, string>({
-      query: (wabaId) => ({
-        url: `/whatsapp/baileys/qrcode/${wabaId}`,
-      }),
+    getBaileysQRCode: builder.query<{ success: boolean; data?: { qr_code?: string; status?: string } }, string | { wabaId: string; syncChat?: boolean }>({
+      query: (arg) => {
+        const { wabaId, syncChat } = typeof arg === "string" ? { wabaId: arg, syncChat: undefined } : arg;
+        return {
+          url: `/whatsapp/baileys/qrcode/${wabaId}`,
+          params: syncChat === undefined ? undefined : { sync_chat: String(syncChat) },
+        };
+      },
+      // Cache by wabaId only, so socket QR updates (keyed by waba_id) reach the same entry
+      serializeQueryArgs: ({ queryArgs }) => (typeof queryArgs === "string" ? queryArgs : queryArgs.wabaId),
       providesTags: ["WhatsappStatus"],
     }),
     disconnectWhatsApp: builder.mutation<{ success: boolean; message: string }, { provider: string; waba_id: string }>({

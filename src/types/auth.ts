@@ -134,6 +134,7 @@ export interface ConnectWhatsAppPayload {
   business_id?: string;
   app_id?: string;
   workspace_id?: string;
+  sync_chat?: boolean;
 }
 
 export interface ConnectWhatsAppResponse {

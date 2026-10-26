@@ -1131,6 +1131,8 @@
   "connect_success": "WhatsApp connected successfully!",
   "instance_name": "Instance Name",
   "instance_name_placeholder": "e.g. Sales Team WhatsApp",
+  "sync_chat_history": "Sync chat history",
+  "sync_chat_history_desc": "Import your existing WhatsApp chats when the device is linked. To sync an already linked number, unlink it on your phone and scan again.",
   "follow_steps": "Follow these steps:",
   "qr_step1": "Open WhatsApp on your phone",
   "qr_step2": "Tap Menu (⋮) or Settings (⚙️) and select Linked Devices",

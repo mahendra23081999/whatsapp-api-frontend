@@ -13,7 +13,8 @@ export async function GET(
     const session = await getServerSession(authoption);
     const token = session?.accessToken as string;
 
-    const response = await fetch(`${BACKEND_API_URL}/whatsapp/baileys/qrcode/${wabaId}`, {
+    const search = request.nextUrl.search;
+    const response = await fetch(`${BACKEND_API_URL}/whatsapp/baileys/qrcode/${wabaId}${search}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
