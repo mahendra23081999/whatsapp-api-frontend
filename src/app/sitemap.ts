@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://whatsapp-api-1-909486928139.asia-south1.run.app/api';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const domain = (process.env.NEXTAUTH_URL || 'http://localhost:3000').replace(/\/$/, '');

@@ -6,7 +6,7 @@ import { resetChatState } from "../reducers/messenger/chatSlice";
 import { clearWorkspace } from "../reducers/workspaceSlice";
 import { ROUTES } from "@/src/constants";
 
-const API_BASE_URL = typeof window === "undefined" ? process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api" : process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
+const API_BASE_URL = typeof window === "undefined" ? process.env.NEXT_PUBLIC_API_URL || "https://whatsapp-api-1-909486928139.asia-south1.run.app/api" : process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
 
 const EXPIRATION_MESSAGES = ["Session expired or logged out", "Token is invalid or expired", "Session expired", "Token expired", "Please log in again", "Invalid token: user not found"];
 
