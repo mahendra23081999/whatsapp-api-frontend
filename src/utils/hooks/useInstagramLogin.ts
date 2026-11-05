@@ -5,11 +5,6 @@ import { useConnectChannelMutation } from "@/src/redux/api/channelsApi";
 import { useAppSelector } from "@/src/redux/hooks";
 import { INSTAGRAM_REDIRECT_URI } from "@/src/constants";
 
-const getInstagramRedirectUri = () =>
-  window.location.hostname === "localhost"
-    ? "https://malcontentedly-turfy-colene.ngrok-free.dev/instagram-callback"
-    : INSTAGRAM_REDIRECT_URI;
-
 export const useInstagramLogin = (onFinish?: (data: any) => void) => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectChannel] = useConnectChannelMutation();
@@ -31,11 +26,17 @@ export const useInstagramLogin = (onFinish?: (data: any) => void) => {
         }
 
         try {
+
+          const redirectUri = window.location.hostname === 'localhost'
+                ? `https://malcontentedly-turfy-colene.ngrok-free.dev/instagram-callback`
+                : `https://wabot.multiplestack.com/instagram_connect`;
+
+
           const response = await connectChannel({
             platform: "instagram",
             workspace_id: workspaceId,
             code: code,
-            redirect_uri: getInstagramRedirectUri(),
+            redirect_uri: redirectUri,
           }).unwrap();
 
           toast.success(response.message || "Instagram connected successfully!");
@@ -70,7 +71,6 @@ export const useInstagramLogin = (onFinish?: (data: any) => void) => {
     }
 
     setIsConnecting(true);
-    const redirectUri = getInstagramRedirectUri();
 
     const scopes = [
       "instagram_business_basic", 
@@ -79,7 +79,7 @@ export const useInstagramLogin = (onFinish?: (data: any) => void) => {
       "instagram_business_content_publish"
     ].join(",");
 
-    const authUrl = `https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=${setting.ig_app_id}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scopes}&state=${workspaceId}`;
+    const authUrl = `https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=${setting.ig_app_id}&redirect_uri=${encodeURIComponent(INSTAGRAM_REDIRECT_URI)}&response_type=code&scope=${scopes}&state=${workspaceId}`;
 
     const width = 600;
     const height = 700;
