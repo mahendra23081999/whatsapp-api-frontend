@@ -3,7 +3,7 @@ import { useCallback, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useConnectChannelMutation } from "@/src/redux/api/channelsApi";
 import { useAppSelector } from "@/src/redux/hooks";
-import { getUrlWithBasePath } from "../index";
+import { INSTAGRAM_REDIRECT_URI } from "@/src/constants";
 
 export const useInstagramLogin = (onFinish?: (data: any) => void) => {
   const [isConnecting, setIsConnecting] = useState(false);
@@ -14,8 +14,6 @@ export const useInstagramLogin = (onFinish?: (data: any) => void) => {
 
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
-      // if (!event.origin.includes("localhost") && !event.origin.includes("ngrok-free.dev")) return;
-
       const { type, payload } = event.data;
 
       if (type === "INSTAGRAM_AUTH_SUCCESS") {
@@ -32,9 +30,7 @@ export const useInstagramLogin = (onFinish?: (data: any) => void) => {
             platform: "instagram",
             workspace_id: workspaceId,
             code: code,
-            redirect_uri: window.location.hostname === 'localhost'
-              ? `https://malcontentedly-turfy-colene.ngrok-free.dev/instagram-callback`
-              : `${process.env.NEXT_PUBLIC_STORAGE_URL}/instagram-callback`,
+            redirect_uri: INSTAGRAM_REDIRECT_URI,
           }).unwrap();
 
           toast.success(response.message || "Instagram connected successfully!");
@@ -70,13 +66,6 @@ export const useInstagramLogin = (onFinish?: (data: any) => void) => {
 
     setIsConnecting(true);
 
-    // const redirectUri = window.location.hostname === 'localhost'
-    //   ? `https://malcontentedly-turfy-colene.ngrok-free.dev/instagram-callback`
-    //   : `${process.env.NEXT_PUBLIC_STORAGE_URL}/instagram-callback`;
-
-    const redirectUri = window.location.hostname === 'localhost'
-      ? `https://malcontentedly-turfy-colene.ngrok-free.dev/instagram-callback`
-      : `https://wabot.multiplestack.com/instagram_connect`;
     const scopes = [
       "instagram_business_basic", 
       "instagram_business_manage_messages",
@@ -84,7 +73,7 @@ export const useInstagramLogin = (onFinish?: (data: any) => void) => {
       "instagram_business_content_publish"
     ].join(",");
 
-    const authUrl = `https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=${setting.ig_app_id}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scopes}&state=${workspaceId}`;
+    const authUrl = `https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=${setting.ig_app_id}&redirect_uri=${encodeURIComponent(INSTAGRAM_REDIRECT_URI)}&response_type=code&scope=${scopes}&state=${workspaceId}`;
 
     const width = 600;
     const height = 700;
