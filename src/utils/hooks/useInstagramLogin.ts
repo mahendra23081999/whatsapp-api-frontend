@@ -26,11 +26,17 @@ export const useInstagramLogin = (onFinish?: (data: any) => void) => {
         }
 
         try {
+
+          const redirectUri = window.location.hostname === 'localhost'
+                ? `https://malcontentedly-turfy-colene.ngrok-free.dev/instagram-callback`
+                : `https://wabot.multiplestack.com/instagram_connect`;
+
+
           const response = await connectChannel({
             platform: "instagram",
             workspace_id: workspaceId,
             code: code,
-            redirect_uri: INSTAGRAM_REDIRECT_URI,
+            redirect_uri: redirectUri,
           }).unwrap();
 
           toast.success(response.message || "Instagram connected successfully!");
