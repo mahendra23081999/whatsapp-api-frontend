@@ -70,9 +70,13 @@ export const useInstagramLogin = (onFinish?: (data: any) => void) => {
 
     setIsConnecting(true);
 
+    // const redirectUri = window.location.hostname === 'localhost'
+    //   ? `https://malcontentedly-turfy-colene.ngrok-free.dev/instagram-callback`
+    //   : `${process.env.NEXT_PUBLIC_STORAGE_URL}/instagram-callback`;
+
     const redirectUri = window.location.hostname === 'localhost'
       ? `https://malcontentedly-turfy-colene.ngrok-free.dev/instagram-callback`
-      : `${process.env.NEXT_PUBLIC_STORAGE_URL}/instagram-callback`;
+      : `https://wabot.multiplestack.com/instagram_connect`;
     const scopes = [
       "instagram_business_basic", 
       "instagram_business_manage_messages",
