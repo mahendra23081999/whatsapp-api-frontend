@@ -15,6 +15,7 @@ interface FeatureGuardProps {
 }
 
 const FeatureGuard: React.FC<FeatureGuardProps> = ({ children }) => {
+
   const pathname = usePathname();
   const router = useRouter();
   const { selectedWorkspace } = useAppSelector((state) => state.workspace);

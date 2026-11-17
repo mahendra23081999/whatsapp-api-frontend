@@ -1,11 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useConnectChannelMutation } from "@/src/redux/api/channelsApi";
 import { useAppSelector } from "@/src/redux/hooks";
-import { getUrlWithBasePath } from "../index";
+
+// Must be EXACTLY the same in the authorize URL and the code exchange, and registered in
+// Meta App > Instagram > Business login settings > OAuth redirect URIs.
+const getInstagramRedirectUri = () =>
+  typeof window !== "undefined" && window.location.hostname === "localhost"
+    ? "https://malcontentedly-turfy-colene.ngrok-free.dev/instagram-callback"
+    : "https://wabot.multiplestack.com/instagram-callback";
 
 export const useInstagramLogin = (onFinish?: (data: any) => void) => {
+  // Instagram auth codes are single-use; never send the same code twice
+  const processedCodes = useRef<Set<string>>(new Set());
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectChannel] = useConnectChannelMutation();
   const { selectedWorkspace } = useAppSelector((state: any) => state.workspace);
@@ -19,7 +27,12 @@ export const useInstagramLogin = (onFinish?: (data: any) => void) => {
       const { type, payload } = event.data;
 
       if (type === "INSTAGRAM_AUTH_SUCCESS") {
-        const { code, state } = payload;
+        const { state } = payload;
+        // Instagram appends "#_" to the code
+        const code = typeof payload.code === "string" ? payload.code.replace(/#_$/, "") : payload.code;
+
+        if (!code || processedCodes.current.has(code)) return;
+        processedCodes.current.add(code);
 
         if (state !== workspaceId) {
           toast.error("Invalid state parameter during authentication.");
@@ -32,9 +45,7 @@ export const useInstagramLogin = (onFinish?: (data: any) => void) => {
             platform: "instagram",
             workspace_id: workspaceId,
             code: code,
-            redirect_uri: window.location.hostname === 'localhost'
-              ? `https://malcontentedly-turfy-colene.ngrok-free.dev/instagram-callback`
-              : `${process.env.NEXT_PUBLIC_STORAGE_URL}/instagram-callback`,
+            redirect_uri: getInstagramRedirectUri(),
           }).unwrap();
 
           toast.success(response.message || "Instagram connected successfully!");
@@ -70,14 +81,7 @@ export const useInstagramLogin = (onFinish?: (data: any) => void) => {
 
     setIsConnecting(true);
 
-    // const redirectUri = window.location.hostname === 'localhost'
-    //   ? `https://malcontentedly-turfy-colene.ngrok-free.dev/instagram-callback`
-    //   : `${process.env.NEXT_PUBLIC_STORAGE_URL}/instagram-callback`;
-
-    const redirectUri = window.location.hostname === 'localhost'
-      ? `https://malcontentedly-turfy-colene.ngrok-free.dev/instagram-callback`
-      : `https://wabot.multiplestack.com/instagram-callback`;
-      
+    const redirectUri = getInstagramRedirectUri();
 
     const scopes = [
       "instagram_business_basic", 
