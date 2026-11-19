@@ -87,7 +87,7 @@ const ChatSidebar = () => {
 
   const { data: connectedChannelsResult } = useGetConnectedChannelsQuery(
     { workspace_id: selectedWorkspace?._id || "" },
-    { skip: !selectedWorkspace?._id }
+    { skip: !selectedWorkspace?._id, refetchOnMountOrArgChange: true }
   );
 
   const omnichannelConnections = useMemo(() => {

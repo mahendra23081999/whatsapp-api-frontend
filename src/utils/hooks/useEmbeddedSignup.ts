@@ -4,22 +4,25 @@ import { useAppSelector } from "@/src/redux/hooks";
 import { useFacebookReady } from "@/src/app/FacebookSDKProvider";
 
 export const useEmbeddedSignup = (onFinish: (code: string, data: any) => void) => {
+
   const [authCode, setAuthCode] = useState<string | null>(null);
   const [signupData, setSignupData] = useState<any>(null);
   const fbReady = useFacebookReady();
   const { setting } = useAppSelector((state) => state.setting);
 
   useEffect(() => {
+
+       
     const handler = (event: MessageEvent) => {
+      
       if (!event.origin.includes("facebook")) return;
 
       try {
+
         const payload = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
 
-        if (
-          payload.type === "WA_EMBEDDED_SIGNUP" &&
-          (payload.event === "FINISH" || payload.event === "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING")
-        ) {
+        if (payload.type === "WA_EMBEDDED_SIGNUP" &&
+          (payload.event === "FINISH" || payload.event === "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING")) {
           // Keep the event so the backend can tell coexistence signups apart
           setSignupData({ ...payload.data, event: payload.event });
         }
@@ -39,6 +42,7 @@ export const useEmbeddedSignup = (onFinish: (code: string, data: any) => void) =
   }, [authCode, signupData, onFinish]);
 
   const startSignup = useCallback(() => {
+
     if (!fbReady || !window.FB) return;
 
     window.FB.login(

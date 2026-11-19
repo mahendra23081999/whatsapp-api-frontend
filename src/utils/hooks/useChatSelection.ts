@@ -9,11 +9,12 @@ interface UseChatSelectionProps {
 }
 
 export const useChatSelection = ({ workspaceId, sortedChats }: UseChatSelectionProps) => {
+
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedContactIds, setSelectedContactIds] = useState<string[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
   const [deleteChat, { isLoading: isDeleting }] = useDeleteChatMutation();
+  
 
   const handleToggleSelectionMode = () => {
     setIsSelectionMode(!isSelectionMode);
@@ -33,15 +34,18 @@ export const useChatSelection = ({ workspaceId, sortedChats }: UseChatSelectionP
       setSelectedContactIds([]);
     } else {
       setSelectedContactIds(sortedChats.map((c) => c.contact.id));
-    }
+    }  
+
   };
 
   const handleDeleteChats = async () => {
+    
     if (!workspaceId || selectedContactIds.length === 0) return;
-
+    
     try {
+
       const response = await deleteChat({
-        workspace_id: workspaceId,
+        workspace_id: workspaceId,             
         contact_ids: selectedContactIds,
       }).unwrap();
 

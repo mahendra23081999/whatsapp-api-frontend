@@ -2,7 +2,7 @@
 import { ApiResponse } from "@/src/types/shared";
 import { baseApi } from "./baseApi";
 
-export const facebookApi = baseApi.enhanceEndpoints({ addTagTypes: ["FacebookPage", "FacebookAdAccount", "FacebookAdCampaign", "FacebookAdSet", "FacebookAd", "FacebookLeadForm"] }).injectEndpoints({
+export const facebookApi = baseApi.enhanceEndpoints({ addTagTypes: ["FacebookPage", "FacebookAdAccount", "FacebookAdCampaign", "FacebookAdSet", "FacebookAd", "FacebookLeadForm", "ConnectedChannel"] }).injectEndpoints({
   endpoints: (builder) => ({
     getFacebookPages: builder.query<ApiResponse, { page?: number; limit?: number; search?: string; sortBy?: string; sortOrder?: string; workspaceId?: string } | void>({
       query: (params) => ({
@@ -16,7 +16,7 @@ export const facebookApi = baseApi.enhanceEndpoints({ addTagTypes: ["FacebookPag
         url: "/facebook/sync",
         method: "POST",
       }),
-      invalidatesTags: ["FacebookPage"],
+      invalidatesTags: ["FacebookPage", "ConnectedChannel"],
     }),
     getFacebookAdAccounts: builder.query<ApiResponse, { page?: number; limit?: number; search?: string; sortBy?: string; sortOrder?: string; workspaceId?: string } | void>({
       query: (params) => ({
@@ -52,7 +52,7 @@ export const facebookApi = baseApi.enhanceEndpoints({ addTagTypes: ["FacebookPag
         url: `/facebook/pages/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["FacebookPage"],
+      invalidatesTags: ["FacebookPage", "ConnectedChannel"],
     }),
 
     // Campaigns
@@ -189,7 +189,7 @@ export const facebookApi = baseApi.enhanceEndpoints({ addTagTypes: ["FacebookPag
         method: "POST",
         body,
       }),
-      invalidatesTags: ["FacebookPage", "FacebookAdAccount"],
+      invalidatesTags: ["FacebookPage", "FacebookAdAccount", "ConnectedChannel"],
     }),
     getFacebookLeadForms: builder.query<ApiResponse, { page_id: string }>({
       query: (params) => ({
