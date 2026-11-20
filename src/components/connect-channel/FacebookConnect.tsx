@@ -37,9 +37,8 @@ const FacebookConnect = () => {
     toast.success(t("copied_success", { title }));
   };
 
-  const ImageBaseUrlfacebook = 'https://whatsapp-api-1-909486928139.asia-south1.run.app/';
-  
-  const webhookUrl = setting?.facebook_lead_webhook_url ? `${ImageBaseUrlfacebook ?? ""}/${setting.facebook_lead_webhook_url}` : "";
+  const ImageBaseUrlfacebook = 'https://whatsapp-api-1-909486928139.asia-south1.run.app';
+
   const verifyToken = setting?.facebook_lead_webhook_verify_token || "";
 
   // Get connected channels status
