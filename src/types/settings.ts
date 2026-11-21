@@ -11,7 +11,7 @@ export interface SettingResponse {
   app_id: string;
   app_secret: string;
   configuration_id: string;
-
+  
   ig_app_id?: string;
   ig_app_secret?: string;
 

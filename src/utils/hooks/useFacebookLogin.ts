@@ -2,7 +2,6 @@
 import { useCallback, useState } from "react";
 import { useFacebookReady } from "@/src/app/FacebookSDKProvider";
 import { useConnectFacebookMutation } from "@/src/redux/api/facebookApi";
-import { useAppSelector } from "@/src/redux/hooks";
 import { toast } from "sonner";
 
 // Page-only permissions. Do NOT add whatsapp_* scopes here: on a Business app, mixing them in
@@ -31,9 +30,6 @@ export const useFacebookLogin = (onFinish?: (data: any) => void) => {
   const [isConnecting, setIsConnecting] = useState(false);
   const fbReady = useFacebookReady();
   const [connectFacebook] = useConnectFacebookMutation();
-  const { setting } = useAppSelector((state: any) => state.setting);
-  const facebookConfigId: string | undefined = setting?.configuration_id || null ;
-  
 
   const startLogin = useCallback(() => {
     if (!fbReady || !window.FB) {
@@ -49,7 +45,7 @@ export const useFacebookLogin = (onFinish?: (data: any) => void) => {
           const accessToken = res.authResponse.accessToken;
           const granted: string[] = (res.authResponse.grantedScopes || "").split(",").filter(Boolean);
           const missing = granted.length ? REQUIRED_PAGE_SCOPES.filter((s) => !granted.includes(s)) : [];
-          console.log("[Facebook Login] granted scopes:", granted.join(",") || "(not returned)", "config_id:", facebookConfigId || "(none, using scope)");
+          console.log("[Facebook Login] granted scopes:", granted.join(",") || "(not returned)");
           if (missing.length) {
             console.error("[Facebook Login] Missing page permissions:", missing.join(","));
             toast.error(`Facebook did not grant page permissions (${missing.join(", ")}). Select your Page and allow all permissions, or add these permissions to the Meta app.`);
@@ -78,12 +74,11 @@ export const useFacebookLogin = (onFinish?: (data: any) => void) => {
           toast.error("Facebook login was cancelled or failed.");
         }
       },
-      facebookConfigId
-        ? // Facebook Login for Business "General" configuration with Pages assets (NOT the WhatsApp signup config)
-          { config_id: facebookConfigId, return_scopes: true, auth_type: "rerequest" }
-        : { scope: FACEBOOK_PAGE_SCOPES, return_scopes: true, auth_type: "rerequest" }
+      // Scope-based login. Do NOT pass setting.configuration_id here: that is the WhatsApp Embedded
+      // Signup config, which only supports response_type=code and shows the WhatsApp asset picker.
+      { scope: FACEBOOK_PAGE_SCOPES, return_scopes: true, auth_type: "rerequest" }
     );
-  }, [fbReady, connectFacebook, onFinish, facebookConfigId]);
+  }, [fbReady, connectFacebook, onFinish]);
 
   return { startLogin, isConnecting, fbReady };
 };
