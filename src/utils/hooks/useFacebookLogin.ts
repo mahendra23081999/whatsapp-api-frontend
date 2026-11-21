@@ -4,28 +4,6 @@ import { useFacebookReady } from "@/src/app/FacebookSDKProvider";
 import { useConnectFacebookMutation } from "@/src/redux/api/facebookApi";
 import { toast } from "sonner";
 
-// Page-only permissions. Do NOT add whatsapp_* scopes here: on a Business app, mixing them in
-// turns the dialog into the WhatsApp asset picker and the page permissions get dropped.
-const FACEBOOK_PAGE_SCOPES = [
-  "public_profile",
-  "email",
-  "pages_show_list",
-  "pages_messaging",
-  "pages_manage_metadata",
-  "pages_read_engagement",
-  "pages_manage_engagement",
-  "pages_manage_ads",
-  "business_management",
-  "instagram_basic",
-  "instagram_manage_messages",
-  "leads_retrieval",
-  "ads_management",
-  "ads_read",
-  "catalog_management",
-].join(",");
-
-const REQUIRED_PAGE_SCOPES = ["pages_show_list", "pages_messaging", "pages_manage_metadata"];
-
 export const useFacebookLogin = (onFinish?: (data: any) => void) => {
   const [isConnecting, setIsConnecting] = useState(false);
   const fbReady = useFacebookReady();
@@ -43,13 +21,6 @@ export const useFacebookLogin = (onFinish?: (data: any) => void) => {
       (res: any) => {
         if (res.authResponse?.accessToken) {
           const accessToken = res.authResponse.accessToken;
-          const granted: string[] = (res.authResponse.grantedScopes || "").split(",").filter(Boolean);
-          const missing = granted.length ? REQUIRED_PAGE_SCOPES.filter((s) => !granted.includes(s)) : [];
-          console.log("[Facebook Login] granted scopes:", granted.join(",") || "(not returned)");
-          if (missing.length) {
-            console.error("[Facebook Login] Missing page permissions:", missing.join(","));
-            toast.error(`Facebook did not grant page permissions (${missing.join(", ")}). Select your Page and allow all permissions, or add these permissions to the Meta app.`);
-          }
           const handleAuth = async () => {
             try {
               const response = await connectFacebook({ access_token: accessToken }).unwrap();
@@ -74,9 +45,10 @@ export const useFacebookLogin = (onFinish?: (data: any) => void) => {
           toast.error("Facebook login was cancelled or failed.");
         }
       },
-      // Scope-based login. Do NOT pass setting.configuration_id here: that is the WhatsApp Embedded
-      // Signup config, which only supports response_type=code and shows the WhatsApp asset picker.
-      { scope: FACEBOOK_PAGE_SCOPES, return_scopes: true, auth_type: "rerequest" }
+      {
+        scope: "email,public_profile,business_management,catalog_management,instagram_basic,ads_management,ads_read,leads_retrieval,pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_show_list,pages_manage_engagement,whatsapp_business_management,whatsapp_business_messaging",
+        return_scopes: true,
+      }
     );
   }, [fbReady, connectFacebook, onFinish]);
 
